@@ -4,7 +4,6 @@ import { LoginPage } from './components/LoginPage';
 import './App.css';
 import { ContactsPage } from './components/ContactsPage';
 import { PrivateRoute } from './components/PrivateRoute';
-import { data } from './data';
 import { Typography, Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { ContactById } from './components/ContactById';
@@ -77,7 +76,7 @@ function App() {
             <Registration setUserId={setUserId} setIsAuthenticated={setIsAuthenticated} />
           </Route>
           <PrivateRoute exact path="/contacts" auth={isAuthenticated} >
-            <ContactsPage state={state} setState={setState} data={data.contacts}
+            <ContactsPage state={state} setState={setState}
               searchValue={searchValue} setSearchValue={setSearchValue}
               nameError={nameError} setNameError={setNameError} isNameError={isNameError}
               setIsNameError={setIsNameError} phoneError={phoneError} setPhoneError={setPhoneError}
