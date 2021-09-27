@@ -7,16 +7,13 @@ const useStyles = makeStyles(theme => ({
     root: {
         maxWidth: '600px',
         width: '100%',
-        ['@media (max-width:599px)']: {
-            width: '100%',
-            maxWidth: 'none',
-            padding: '0 16px',
-        },
     },
     container: {
-        padding: '0 16px',
-        width: '60%!important',
         margin: '30px auto',
+        padding: '0 0!important',
+        ['@media (max-width:767px)']: {
+            padding: '0 16px!important',
+        },
         ['@media (max-width:599px)']: {
             width: '100%!important',
             maxWidth: 'none',
@@ -30,7 +27,6 @@ const useStyles = makeStyles(theme => ({
 
 export const SearchContact = (props) => {
     const styles = useStyles();
-    let contacts = props.contacts
 
     const onSearchFieldChange = (e) => {
         props.setSearchValue(e.currentTarget.value.toLowerCase())

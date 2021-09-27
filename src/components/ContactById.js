@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Grid, Typography, Button, Box } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import { Input } from './Forms/Input';
 import { makeStyles } from '@material-ui/styles';
-import { createContactFunc } from './createContactFunc';
+import { createContactFunc } from './createDataFunc';
 
 
 const useStyles = makeStyles(theme => ({
@@ -44,49 +44,56 @@ const useStyles = makeStyles(theme => ({
         margin: '10px 0',
         alignSelf: 'flex-start'
     }
-}))
+}));
 
 export const ContactById = (props) => {
     const history = useHistory();
     const styles = useStyles();
+    const contact = props.state.filter(item => item.id === Number(history.location.pathname.split(/[^1-9]*/).join('')));
 
-    const contact = props.state.filter(item => item.id === Number(history.location.pathname.split(/[^1-9]*/).join('')))
-    console.log(contact[0].id);
-
-    const [name, setName] = useState(contact[0].name)
-    const [phone, setPhone] = useState(contact[0].phone)
-
+    const [name, setName] = useState(contact[0].name);
+    const [phone, setPhone] = useState(contact[0].phone);
     const onNameChange = (e) => {
         setName(e.currentTarget.value)
-    }
+    };
     const onPhoneChange = (e) => {
         setPhone(e.currentTarget.value)
-    }
+    };
     const onBack = () => {
         props.setNameError(undefined);
         props.setPhoneError(undefined);
         props.setIsNameError(false);
         props.setIsPhoneError(false);
+        props.setSearchValue(undefined);
         history.push('/contacts')
-    }
-    console.log(props.setNameError, props.setIsNameError);
-    const onSave = () => {
+    };
+    const onSave = async () => {
         const id = contact[0].id;
         /**
          * Arguments: id, setNameError, setIsNameError, setPhoneError, setIsPhoneError
         */
-        const editedContact = createContactFunc(id, props.setNameError, props.setIsNameError, props.setPhoneError, props.setIsPhoneError)
-        console.log(editedContact === undefined);
-        if (editedContact != undefined) {
-            for (let i = 0; i < props.state.length; i++) {
-                const updatedContactsList = props.state.filter(item => Number(item.id) != Number(editedContact.id));
-                updatedContactsList.push(editedContact)
-                props.setState(updatedContactsList)
-                history.push('/contacts')
+        const editedContact = createContactFunc(id, props.userId, props.setNameError, props.setIsNameError, props.setPhoneError, props.setIsPhoneError)
+        if (editedContact !== undefined) {
+            const url = `http://localhost:3004/contacts/${id}`
+            const response = await fetch(url, {
+                method: "PATCH",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(editedContact)
+            })
+            if (response.status === 200) {
+                const url = `http://localhost:3004/contacts?user_id=${props.userId}`;
+                const res = await fetch(url);
+                const contacts = await res.json();
+                props.setState(contacts);
+                history.push('/contacts');
+            } else {
+                alert("Something went wrong! try again")
             }
         }
         return false
-    }
+    };
 
     return (
         <Grid container

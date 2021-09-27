@@ -6,7 +6,6 @@ import EditIcon from '@material-ui/icons/Edit';
 import { useHistory } from 'react-router-dom';
 
 
-
 const useStyles = makeStyles((theme) => ({
     root: {
         width: '100%',
@@ -14,6 +13,12 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'row',
         justifyContent: 'center',
         margin: '0 0 10px 0!important',
+    },
+    cardContainer: {
+        padding: '0 0!important',
+        ['@media (max-width:767px)']: {
+            padding: '0 16px!important',
+        },
     },
     wrapper: {
         width: '60%',
@@ -74,6 +79,16 @@ const useStyles = makeStyles((theme) => ({
         ['@media (max-width:599px)']: {
 
         },
+    },
+    infoCard: {
+        maxWidth: '600px',
+        margin: '0 auto',
+        height: '150px',
+        padding: '20px 0 0 0',
+        ['@media (max-width:599px)']: {
+            margin: '0 16px',
+            padding: '10px!important'
+        },
     }
 }))
 
@@ -81,22 +96,29 @@ export const Contact = (props) => {
     let contacts = props.state;
     const styles = useStyles();
     const history = useHistory();
-    console.log(props.theme);
 
-    const onDeleteContact = (e) => {
+    const onDeleteContact = async (e) => {
         const id = e.currentTarget.id
         if (id) {
-            for (let i = 0; i < props.state.length; i++) {
-                if (Number(props.state[i].id) == Number(id)) {
-                    props.state.splice(i, 1)
-                    const newContactList = [...props.state]
-                    props.setState(newContactList)
+            const url = `http://localhost:3004/contacts/${id}`
+            const response = await fetch(url, {
+                method: "DELETE"
+            })
+            if (response.status === 200) {
+                try {
+                    const url = `http://localhost:3004/contacts?user_id=${props.userId}`;
+                    const res = await fetch(url);
+                    const contacts = await res.json();
+                    props.setState(contacts);
+                    props.setIsSearchValueChanged(!props.isSearchValueChanged);
+                } catch (err) {
+                    alert(err)
                 }
             }
         } else {
             alert('Error! Try again!')
         }
-    }
+    };
     const editContact = (e) => {
         props.setNameError(undefined);
         props.setPhoneError(undefined);
@@ -104,14 +126,12 @@ export const Contact = (props) => {
         props.setIsPhoneError(false);
         const id = e.currentTarget.id
         history.push(`/contact/${id}`)
-    }
-
-
+    };
 
     return (<>
         {
             contacts.length
-                ? <Container >
+                ? <Container className={styles.cardContainer} >
 
                     <Grid container
                         direction="column"
@@ -150,7 +170,10 @@ export const Contact = (props) => {
                         </Grid>
                     </Grid>
                 </Container>
-                : <Typography variant="h4" >You have no contacts yet!</Typography>
+                : <Card className={styles.infoCard} >
+                    <Typography variant="h5" >No contacts found! =(</Typography>
+                    <Typography >It may happen you have no contact yet or you search outside you contacts list. Create a contact or change the search statement.</Typography>
+                </Card>
         }
     </>)
 }
